@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title>PA QAP Scoring</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.2/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.2/mapbox-gl.css' rel='stylesheet' />
+    <link rel="stylesheet" href="css/leaflet.css" />
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+        body { margin:0; padding:0; }
+        #map { position:absolute; top:0; bottom:0; width:100%; }
+    </style>
+</head>
+
+<body>
+  <!-- Map -->
+  <div id="map" class="map"></div>
+  <div class='map-overlay' id='features'><h2>Poverty Rates, by Neighborhood</h2><div id='pd'><p>Hover over a neighborhood!</p></div></div>
+  <!-- Legend -->
+  <div class='map-overlay' id='legend'></div>
+
+
+
+    <!-- Javascript Imports -->
+    <script src="js/jquery.js"></script>
+    <script src="js/underscore.js"></script>
+    <script src="js/leaflet.js"></script>
+    <script src="js/chroma.js"></script>
+    <script src="js/sidebarText.js"></script>
+    <script src="js/main.js"></script>
+  </body>
+</html>

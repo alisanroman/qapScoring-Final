@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title>PA QAP Scoring</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.2/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.2/mapbox-gl.css' rel='stylesheet' />
+    <style>
+        body { margin:0; padding:0; }
+        #map { position:absolute; top:0; bottom:0; width:100%; }
+    </style>
+</head>
+<body>
+
+<div id='map'></div>
+
+<div class='map-overlay' id='features'><h2>Poverty Rates, by Neighborhood</h2><div id='pd'><p>Hover over a neighborhood!</p></div></div>
+<div class='map-overlay' id='legend'></div>
+
+<script>
+mapboxgl.accessToken = 'pk.eyJ1IjoiYW1zciIsImEiOiJjamY0Y2VtNTcwcmh0MzJsM2U0dGlvazNwIn0.n1yPJwVT5cTlvYsvMpfhFw';
+var map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/amsr/cjg7ddv260emp2rniwg5mjeoa',
+    center: [-75.2,40],
+    zoom: 10
+});
+
+
+map.on('load', function() {
+  var layers = ['0-10%', '10-20%', '20-40%', '40-50%','>50%'];
+  var colors = ['#F03400','#F26711','#D9A60F','#758540','#384216'];
+
+  for (i = 0; i < layers.length; i++) {
+    var layer = layers[i];
+    var color = colors[i];
+    var item = document.createElement('div');
+    var key = document.createElement('span');
+    key.className = 'legend-key';
+    key.style.backgroundColor = color;
+
+    var value = document.createElement('span');
+    value.innerHTML = layer;
+    item.appendChild(key);
+    item.appendChild(value);
+    legend.appendChild(item);
+  }
+
+  map.on('mousemove', function(e) {
+    var states = map.queryRenderedFeatures(e.point, {
+      layers: ['nhoodData']
+      });
+
+      if (states.length > 0) {
+        document.getElementById('pd').innerHTML = '<h3><strong>' + states[0].properties.name + '</strong></h3><p><strong><em>' + states[0].properties.povPct + '</strong>% of people per square mile</em></p>';
+  } else {
+    document.getElementById('pd').innerHTML = '<p>Hover over a neighborhood!</p>';
+  }
+});
+
+
+
+
+
+  // Add a new source from our GeoJSON data and set the 'cluster' option to true. GL-JS will add the point_count property to your source data.
+  map.addSource("housing",{
+    type: "geojson",
+    // Point to GeoJSON data
+    data: "https://raw.githubusercontent.com/alisanroman/qapScoring/master/data/pointData.geojson",
+    cluster: true,
+    clusterMaxZoom: 14, // Max zoom to cluster points on
+    clusterRadius: 50 // Radius of each cluster when clustering points
+  });
+  map.addLayer({
+    id: "clusters",
+    type: "circle",
+    source: "housing",
+    filter: ["has","point_count"],
+    paint: { "circle-color": [ "step",
+                ["get", "point_count"],
+                "#51bbd6",
+                50,
+                "#f1f075",
+                250,
+                "#f28cb1"  ],
+            "circle-radius": [ "step",
+                ["get", "point_count"],
+                20,
+                50,
+                30,
+                250,
+                40 ] }  });
+  map.addLayer({
+    id: "cluster-count",
+    type: "symbol",
+    source: "housing",
+    filter: ["has", "point_count"],
+    layout: {
+        "text-field": "{point_count_abbreviated}",
+        "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
+        "text-size": 12} });
+  map.addLayer({
+      id: "unclustered-point",
+      type: "circle",
+      source: "housing",
+      filter: ["!has", "point_count"],
+      paint: {
+          "circle-color": "#11b4da",
+          "circle-radius": 4,
+          "circle-stroke-width": 1,
+          "circle-stroke-color": "#fff"}
+    });
+});
+
+</script>
+
+</body>
+</html>

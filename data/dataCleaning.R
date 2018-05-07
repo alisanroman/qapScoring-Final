@@ -15,18 +15,31 @@ library(RCurl)
 library(xmltools)
 library(DT)
 library(mapview)
+library(readr)
 
 censusKey <- "4d92e5c53d5b7046bae0b72874aceed0fde3e0b4"
 greatSchoolsKey <- "4c6cbbb25c5ad456271f0b1e1b8fe9d4"
+walkscoreKey <-"a0a34de0dd2261f99677763bb3861e33"
 
 # Get geography set up
 hoods <- st_read("https://raw.githubusercontent.com/alisanroman/philly-hoods/master/data/Neighborhoods_Philadelphia.geojson")
+hoods$mapname <- as.character(hoods$mapname)
+allHoods <- unique(hoods$mapname)
+write.csv(allHoods,"hoods.csv")
+allHoods <- read.csv('hoods.csv')
+allHoods$mapname <- as.character(allHoods$mapname)
+allHoods$planURL <- as.character(allHoods$planURL)
+hoods2 <- merge(hoods,allHoods)
+mapview(hoods2)
+
 tracts <- st_read("https://raw.githubusercontent.com/alisanroman/qapScoring/master/data/Census_Tracts_2010.geojson")
 cent<-  st_centroid(tracts)
-hoodsTracts <- st_join(hoods, cent)
+hoodsTracts <- st_join(hoods2, cent)
 hoodsTracts$mapname <- as.character(hoodsTracts$mapname)
 ds_hoodsTracts <- data.frame(hoodsTracts) %>%
   select("mapname","TRACTCE10","GEOID10")
+mapview(hoodsTracts)
+
 
 # Get census data 
 census_pull <- function(year,vars,stateFICS,county) {
@@ -48,7 +61,10 @@ census_pull <- function(year,vars,stateFICS,county) {
 test <- census_pull(year=2016
                     ,vars = 'B17001_001E,B17001_002E,B25003_001E,B25003_002E'
                     ,stateFICS = 42,county = 101)
+
 # get school data
+stateAbbrev='PA'
+city='Philadelphia'
 schoolURL_charter <- paste0("https://api.greatschools.org/schools/",stateAbbrev,"/",city,"/charter/high-schools","?key=",greatSchoolsKey,"&sort=gs_rating&limit=-1" )
 schoolURL_public <- paste0("https://api.greatschools.org/schools/",stateAbbrev,"/",city,"/public/high-schools","?key=",greatSchoolsKey,"&sort=gs_rating&limit=-1" )
 
@@ -68,8 +84,6 @@ schoolData$lon <- as.numeric(schoolData$lon)
 
 # now load in Pa specific data
 schoolDataPA <- read.delim("SPP.APD.2016.2017.txt",sep="|")
-colnames(schoolDataPA)
-unique(schoolDataPA$Data.Element)
 schoolDataPA1 <- subset(schoolDataPA, Data.Element == 'Calculated Score'
                         & (tolower(as.character(LEA.Name)) %in% 
                            tolower(c(unique(schoolData$district),'Esperanza Academy Charter School'
@@ -88,7 +102,7 @@ colnames(schoolDataPA1)
 ds <- schoolDataPA1[,c(2,7,8)]
 colnames(ds)[1] <- 'name'
 write.csv(ds,"scldatPA.csv")
-write.csv(schoolData,"gsDat.csv")
+#write.csv(schoolData,"gsDat.csv")
 gsDat <- read_csv("gsDat.csv")
 
 schoolPoint <- st_as_sf(x = gsDat, coords = c("lon", "lat"), crs = "+proj=longlat +datum=WGS84")
@@ -96,8 +110,6 @@ schoolPoint  <- as(schoolPoint, "Spatial")
 mapview(schoolPoint)
 
 geojson_write(input=schoolPoint,file="schoolPoints.geojson")
-
-
 
 
 ## combine spatial & census data
@@ -113,20 +125,8 @@ combo3$homPct <- ifelse(combo3$hhs != 0, as.numeric(round((combo3$hom / combo3$h
 polyData <- left_join(x=hoods,y=combo3,by="mapname")
 polyData <- subset(polyData,select = -c(cartodb_id,created_at,updated_at,name,listname))
 polyData$lowPov <-  ifelse(polyData$povPct < 25.9,1,0)
-polyData$affordOptions <- ()
-polyData$affordProduction <- ()
 polydata$ownerOcc <- ifelse(polyData$homPct >= 52.4, 1,0)
 polydata$hsScores <- ifelse()
 
-
-
-# Create category var for final slide
-polyData$categ <- ifelse(polyData$povPct < 25.9 & polyData$homPct >= 52.4, "Low poverty, high homeownership",
-                         ifelse(polyData$povPct < 25.9 & polyData$homPct < 52.4, "Low poverty, low homeownership",
-                                ifelse(polyData$povPct >= 25.9 & polyData$homPct < 52.4, "High poverty, low homeownership",
-                                       ifelse(polyData$povPct >= 25.9 & polyData$homPct >= 52.4
-                                              , "High poverty, high homeownership",""))))
-unique(polyData$categ)
-plot(polyData)
 
 geojson_write(input=polyData,file="polyData.geojson")

@@ -5,36 +5,95 @@
     <title>PA QAP Scoring</title>
     <script src='https://api.mapbox.com/mapbox-gl-js/v0.44.2/mapbox-gl.js'></script>
     <link href='https://api.mapbox.com/mapbox-gl-js/v0.44.2/mapbox-gl.css' rel='stylesheet' />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css" integrity="sha512-Rksm5RenBEKSKFjgI3a41vrjkw4EVPlJ3+OiI65vTjIdo9brlAacEuKOiQ5OFh7cOI1bkDwLqdLw3Zg0cRJAAQ==" crossorigin=""/>
-    <script src="https://unpkg.com/leaflet@1.3.1/dist/leaflet.js" integrity="sha512-/Nsx9X4HebavoBvEBuyp3I7od5tA0UzAxs+j83KgC8PU0kgB4XiK4Lfe4y4cgBtaRJQEIFCW+oC506aPT2L1zw==" crossorigin=""></script>
-    <style>
-        body { margin:0; padding:0; }
-        #map { position:absolute; top:0; bottom:0; width:100%; }
-    </style>
+
+    <!-- CSS Imports -->
+    <link rel="stylesheet" href="css/leaflet.css" />
+    <link rel="stylesheet" href="css/style.css" />
 </head>
 
 <body>
-  <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v2.1.1/mapbox-gl-geocoder.min.js'></script>
-  <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v2.1.1/mapbox-gl-geocoder.css' type='text/css' />
-  <style>
-    #geocoder-container > div {
-        min-width:50%;
-        margin-left:25%;
-    }
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-inner">
+      <div class="flex-scroll scroll-styled pad2" id="narrative">
+        <div class="slide">
+          <h2 class="Slide-title">Siting subsidized housing in Philadelphia, PA</h2>
+          By Alexandra San Roman
+          <p></p>
+          Few decisions are more contentious than site selection for subsidized housing.
+          No matter which side of the aisle, people have strong specifications for where
+          they believe is the right location for subsidized housing.
+          To guide the process more intentionally, each state devises a 'Qualified Action Plan' (QAP),
+          which lists the priorities of state housing finance agency in funding projects.
+          These QAPs have a scoring system, and those developments with a higher score
+          have a higher likelihood of getting state funding.
+          <p></p>
+          To help improve the placement of subsidized housing in Philadelphia, Pennsylvania
+          the following tool visualizes several aspects of neighborhood characteristics within the 2016-17
+          <a href='https://www.novoco.com/sites/default/files/atoms/files/pennsylvania_2017-2018_final_qap_2017.pdf'>Pennsylvania QAP</a>
+           to assist developers in scoring themselves accurately, and swiftly. Developers can also use this tool
+          to explore areas of opportunity throughout the City and determine the areas of highest need.
+          <p></p>
+          <div class="button">Next -></div>
+          <p></p>
+        </div>
 
-    .mapboxgl-popup {
-      max-width: 200px;
-      text-align: center;
-      font: 6px/10px 'Helvetica Neue', Arial, Helvetica, sans-serif;
-    }
+        <div class="slide">
+          <h2 class="Slide-title">Neighborhood Characteristics</h2>
+          "The Qualified Action Plan considers many elements of a neighborhood when
+          considering siting Affordable Housing. Poverty Rates, Homeownership Rates,
+          and connections.
+          Developments in neighborhoods with low poverty rates can receive 3 points.
+          Developments in neighborhoods with high owner-occupied markets can receive 3 points.
+          Developments that adhere to a neighborhood's community plan can receive 5 points."
+          <p></p>
+        </div>
 
-  </style>
+        <div class="slide">
+          <h2 class="Slide-title">Existing Affordable Housing Options</h2>
+          "The QAP aims to site affordable housing in communities who do not already
+          have a plethora of availability. A development can get 3 points for locating
+          in a community with limited affordable housing options, both subsidized
+          and non-subsidized.
+          Additionally, a development can get 3 more points for limited affordable housing
+          production in the past 20 years."
+          <p></p>
+        </div>
+
+        <div class="slide">
+          <h2 class="Slide-title">School Quality</h2>
+          "The QAP aims to build new affordable housing in communities with strong
+          neighborhood schools. Here, you can see that senior high schools with
+          building level academic scores of >=70% can receive 1 point, while those with
+          a score of >=80% can receive 2 points."
+          <p></p>
+        </div>
+
+        <div class="slide">
+          <h2 class="Slide-title">Transit-Oriented Design</h2>
+          "The QAP is looking to build new housing in transportation-accessible locations,
+           defined by the state as within 1/2 mile of a transit stop. Site selection
+           within this transit zone can receive 2 points."
+          <p></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Map -->
-  <nav id="menu"></nav>
-  <div id="map" class="map"></div>
+  <div id="map" class="map">  </div>
+
+  <!-- Legend -->
+  <div id="legend">
+    <div class="label">Layers</div>
+    <div id="ptsLegend">
+      <div class = "pts">
+        
+  </div>
+
   <!-- Javascript Imports -->
-  <script src="js/main.js"></script>
   <script src="js/jquery.js"></script>
   <script src="js/underscore.js"></script>
+  <script src="js/main.js"></script>
   </body>
 </html>

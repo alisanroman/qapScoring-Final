@@ -2,7 +2,8 @@ body {
     padding: 0;
     overflow: hidden;
     font-family: Verdana, Geneva, sans-serif;
-    color: #CCCCCC;
+    color: #404040;
+    font-size: smaller;
 }
 
 p.main {
@@ -19,15 +20,42 @@ p.main {
 
 .sidebar {
     position: absolute;
-    left: 0px;
-    width: 300px;
     top: 0;
     bottom: 0;
+    width: 300px;
+    left: 0px;
     overflow-y: auto;
     padding: 20px;
-    background-color: #000000;
+    background-color: #fff;
     opacity: 0.55;
     text-align: left;
+}
+
+.sidebar-inner{
+  display: flex;
+  flex-direction: column;;
+  height: 100%
+}
+
+.round{
+  border-radius: 3px;
+}
+
+#narrative {
+  font-size: 10pt;
+  font-weight: lighter;
+  height: 100%
+}
+
+.flex-scroll {
+  overflow-y: scroll;;
+  min-height: 0;
+  flex: 1;
+}
+
+.slide {
+  min-height: 100%;
+  margin-bottom: 2em;
 }
 
 #sidebar-bottom {
@@ -56,17 +84,20 @@ p.main {
   display: none;
 }
 
-button.abutton {
+.button {
+  cursor: pointer;
+  user-select: none;
+  background: #1A1A1A;
+  text-align: center;
   display: inline-block;
-  width: 120px;
-  height: 50px;
-  margin: 5px;
-  margin-bottom: 20px;
-  border: 1px solid #CCCCCC;
-  background-color: #1A1A1A;
-  color: #CCCCCC;
-  font-family: inherit;
-  font-size: 14px;
+  margin: 0px;
+  padding: 10px;
+  position: relative;
+  border: none;
+  font-family: 'Open Sans Bold', sans-serif;
+  line-height: 20px;
+  font-size: 12px;
+  color: #d9a60f;
 }
 
 #filter-status {
@@ -78,7 +109,7 @@ button.abutton {
 }
 
 .Slide-title {
-  color: #CCCCCC;
+  color: #d9a60f;
   margin-top: 0px;
 }
 

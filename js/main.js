@@ -11,7 +11,7 @@ var pointParsedData;
 var featureGroup;
 var theLimits;
 var toggleableLayerIds = ['census'];
-
+var currentSlide = null;
 
 /* =====================
   Maps
@@ -134,34 +134,42 @@ map.on('load',function () {
       )
       .addTo(map);
   });
-
-  var geocoder = new MapboxGeocoder({
-     accessToken: mapboxgl.accessToken
-   });
-
-   map.addControl(geocoder);
-
-   map.addSource('single-point', {
-       "type": "geojson",
-       "data": {
-         "type": "FeatureCollection",
-         "features": []
-       }
-     });
-
-     map.addLayer({
-       "id": "point",
-       "source": "single-point",
-       "type": "circle",
-       "paint": {
-         "circle-radius": 10,
-         "circle-color": "#007cbf"
-       }
-    });
-
-    geocoder.on('result', function(ev) {
-      map.getSource('single-point').setData(ev.result.geometry);
-    });
-
-
 });
+
+function setupUI() {
+  for(var i=0; i<slides.length; i++) {
+    var stop = slides[i];
+    var stopEl = $("<div class = 'slide'></div>");
+    stopEl.html("<h2 class='Slide-title'>" + stop["title"] + "</h2>");
+    stopEl.data("stop",stop);
+
+    stopEl.append(stop.description);
+
+    if(window.location.search.indexOf('embed') == -1) {
+      var nextEl = $("<p><div class = 'button'>Next -></div></p>");
+      NextEl.on('click',advanceStop);
+      stopEl.append(nextEl);
+    }
+    $("#narrative").append(stopEl);
+  }
+
+  $("#narrative").on("scroll", function() {
+    var closestStop = null;
+    var closestDistance = Number.MAX_VALUE;
+    $("#narrative .slide").each(function(idx, el) {
+      var dist = Math.abs($(el).offset().top);
+      if(dist < closestDistance) {
+        closestStop = $(el).data("stop");
+        closestDistance = dist;
+      }
+    });
+    if(closestStop != null) {
+      showTourStop(closestStop);
+    }
+  });
+
+  $(".button.playback.speed").on("click",function(ev) {
+    speed= $(ev.target).data("speed");
+    animationSettings.seconds_per_frame = speed;
+  });
+}

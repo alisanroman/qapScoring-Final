@@ -78,7 +78,8 @@ combo3$homPct <- ifelse(combo3$hhs != 0, as.numeric(round((combo3$hom / combo3$h
 
 polyData <- left_join(x=hoods2,y=combo3,by="mapname")
 polyData <- subset(polyData,select = -c(cartodb_id,created_at,updated_at,name,listname))
-polyData$lowPov <-  ifelse(polyData$povPct < 25.9,1,0)
-polyData$ownerOcc <- ifelse(polyData$homPct >= 52.4, 1,0)
+polyData$lowPov <-  ifelse(polyData$povPct < 25.9,'Yes','No')
+polyData$ownerOcc <- ifelse(polyData$homPct >= 52.4,'Yes','No')
 
 geojson_write(input=polyData,file="censusData.geojson")
+str(polyData)

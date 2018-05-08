@@ -10,13 +10,17 @@ var parsedData;
 var pointParsedData;
 var featureGroup;
 var theLimits;
-var toggleableLayerIds = ['census'];
-var currentSlide = null;
+var tourStops=[1,2,3,4,5]
+var toggleableLayerIds = ['transit','census','housing','schools'];
+var currentTourStop = null;
+
+/* =====================
+  Functionality
+===================== */
 
 /* =====================
   Maps
 ===================== */
-
 mapboxgl.accessToken = 'pk.eyJ1IjoiYW1zciIsImEiOiJjamY0Y2VtNTcwcmh0MzJsM2U0dGlvazNwIn0.n1yPJwVT5cTlvYsvMpfhFw';
 var map = new mapboxgl.Map({
     container: 'map',
@@ -26,6 +30,8 @@ var map = new mapboxgl.Map({
 });
 
 map.on('load',function () {
+  if(window.location.search.indexOf('embed') !== -1) map.scrollZoom.disable();
+  setupUI();
 
   map.addLayer({
     id: 'transit',
@@ -36,7 +42,8 @@ map.on('load',function () {
     },
     'source-layer': 'transitPoly',
     paint: {
-      'fill-color': '#111111',
+      'fill-color': '#8c8081',
+      'fill-opacity': 0.5,
       'fill-outline-color': '#000000'
     }
   });
@@ -50,7 +57,14 @@ map.on('load',function () {
     },
     'source-layer': 'censusData',
     paint: {
-      'fill-color': 'transparent',
+      'fill-color': [
+        'match',
+        ['get', 'lowPov'],
+        'No', '#F03400',
+        'Yes', '#758540',
+        '#ccc'
+      ],
+      'fill-opacity': 0.2,
       'fill-outline-color': '#000000'
     }
   });
@@ -66,11 +80,11 @@ map.on('load',function () {
         "</strong><br><em class='popup-body'>Poverty Rate: </em>" +
         e.features[0].properties.povPct + "%" +
         "<br><em class='popup-body'>Below Phila Avg? +</em>" +
-        e.features[0].properties.lowPov*3 +
-        "<br><em class='popup-body'>Homeownership Rate: </em>" +
+        e.features[0].properties.lowPov +
+        "<p></p><br><em class='popup-body'>Homeownership Rate: </em>" +
         e.features[0].properties.homPct + "%" +
         "<br><em class='popup-body'>Above Phila Avg? +</em>" +
-        e.features[0].properties.ownerOcc*3 +
+        e.features[0].properties.ownerOcc +
         "<br><em class='popup-body'>Community Plan </em>" +
         "<a href = '" + url  + "'> Link </a>"
       )
@@ -85,14 +99,27 @@ map.on('load',function () {
   });
 
   map.addLayer( {
-    'id': 'housing',
-    'type': 'circle',
-    'source': {
+    id: 'housing',
+    type: 'circle',
+    source: {
       type: 'vector',
       url: 'mapbox://amsr.cjgx11tqx021ilco7divskbob-5i5r8'
     },
     'source-layer': 'affHsgPoints',
     paint: {
+      'circle-radius': [
+        'interpolate',
+        ['linear'],
+        ['get', 'totalUnits'],
+        4,
+        4,
+        728,
+        18
+      ],
+      'circle-opacity': 0.6,
+      'circle-color': '#d9a60f',
+      'circle-stroke-color': '#000000',
+      'circle-stroke-width': 0.5
     }
   });
 
@@ -120,6 +147,19 @@ map.on('load',function () {
     },
     'source-layer': 'schoolPoints',
     paint: {
+      'circle-radius': [
+        'interpolate',
+        ['linear'],
+        ['get', 'BLAS'],
+        30,
+        4,
+        100,
+        18
+      ],
+      'circle-opacity': 0.6,
+      'circle-color': '#451515',
+      'circle-stroke-color': '#000000',
+      'circle-stroke-width': 0.5
     }
   });
 
@@ -136,23 +176,37 @@ map.on('load',function () {
   });
 });
 
+// Create layer toggles
+for (var i = 0; i < toggleableLayerIds.length; i++) {
+    var id = toggleableLayerIds[i];
+
+    var link = document.createElement('a');
+    link.href = '#';
+    link.className = 'active';
+    link.textContent = id;
+
+    link.onclick = function (e) {
+        var clickedLayer = this.textContent;
+        e.preventDefault();
+        e.stopPropagation();
+
+        var visibility = map.getLayoutProperty(clickedLayer, 'visibility');
+
+        if (visibility === 'visible') {
+            map.setLayoutProperty(clickedLayer, 'visibility', 'none');
+            this.className = '';
+        } else {
+            this.className = 'active';
+            map.setLayoutProperty(clickedLayer, 'visibility', 'visible');
+        }
+    };
+
+    var layers = document.getElementById('menu');
+    layers.appendChild(link);
+}
+
+// Create scrolly dude
 function setupUI() {
-  for(var i=0; i<slides.length; i++) {
-    var stop = slides[i];
-    var stopEl = $("<div class = 'slide'></div>");
-    stopEl.html("<h2 class='Slide-title'>" + stop["title"] + "</h2>");
-    stopEl.data("stop",stop);
-
-    stopEl.append(stop.description);
-
-    if(window.location.search.indexOf('embed') == -1) {
-      var nextEl = $("<p><div class = 'button'>Next -></div></p>");
-      NextEl.on('click',advanceStop);
-      stopEl.append(nextEl);
-    }
-    $("#narrative").append(stopEl);
-  }
-
   $("#narrative").on("scroll", function() {
     var closestStop = null;
     var closestDistance = Number.MAX_VALUE;
@@ -168,8 +222,35 @@ function setupUI() {
     }
   });
 
-  $(".button.playback.speed").on("click",function(ev) {
-    speed= $(ev.target).data("speed");
-    animationSettings.seconds_per_frame = speed;
+  $(".button.playback.speed").on("click",function() {
+    speed = $(ev.target).data("speed");
   });
 }
+
+var geocoder = new MapboxGeocoder({
+   accessToken: mapboxgl.accessToken
+ });
+
+ map.addControl(geocoder);
+
+ map.addSource('single-point', {
+     "type": "geojson",
+     "data": {
+       "type": "FeatureCollection",
+       "features": []
+     }
+   });
+
+   map.addLayer({
+     "id": "point",
+     "source": "single-point",
+     "type": "circle",
+     "paint": {
+       "circle-radius": 10,
+       "circle-color": "#007cbf"
+     }
+  });
+
+  geocoder.on('result', function(ev) {
+    map.getSource('single-point').setData(ev.result.geometry);
+  });

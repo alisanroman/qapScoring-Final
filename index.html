@@ -9,6 +9,10 @@
     <!-- CSS Imports -->
     <link rel="stylesheet" href="css/leaflet.css" />
     <link rel="stylesheet" href="css/style.css" />
+
+    <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v2.1.1/mapbox-gl-geocoder.min.js'></script>
+    <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v2.1.1/mapbox-gl-geocoder.css' type='text/css' />
+
 </head>
 
 <body>
@@ -16,7 +20,7 @@
   <div class="sidebar">
     <div class="sidebar-inner">
       <div class="flex-scroll scroll-styled pad2" id="narrative">
-        <div class="slide">
+        <div class="slide" >
           <h2 class="Slide-title">Siting subsidized housing in Philadelphia, PA</h2>
           By Alexandra San Roman
           <p></p>
@@ -34,62 +38,75 @@
            to assist developers in scoring themselves accurately, and swiftly. Developers can also use this tool
           to explore areas of opportunity throughout the City and determine the areas of highest need.
           <p></p>
-          <div class="button">Next -></div>
+          <div class="button">Scroll vvvv</div>
           <p></p>
         </div>
 
         <div class="slide">
           <h2 class="Slide-title">Neighborhood Characteristics</h2>
-          "The Qualified Action Plan considers many elements of a neighborhood when
-          considering siting Affordable Housing. Poverty Rates, Homeownership Rates,
-          and connections.
+          The Qualified Action Plan considers many elements of a neighborhood when
+          considering siting Affordable Housing, most notably Poverty Rates and Homeownership Rates.
+          <p></p>
           Developments in neighborhoods with low poverty rates can receive 3 points.
           Developments in neighborhoods with high owner-occupied markets can receive 3 points.
-          Developments that adhere to a neighborhood's community plan can receive 5 points."
+          <p></p>
+          The QAP also wants the development to align with the neighborhood's plans for redevelopment.
+          Developments that adhere to a neighborhood's community plan can receive 5 points.
+          <p></p>
+          Turn off all layers (in the lower right) but the Census to explore this data further.
+          Zoom to a neighborhood of interest and click for more detail.
+          <p></p>
+          <div class="button">Scroll ... </div>
           <p></p>
         </div>
 
         <div class="slide">
           <h2 class="Slide-title">Existing Affordable Housing Options</h2>
-          "The QAP aims to site affordable housing in communities who do not already
-          have a plethora of availability. A development can get 3 points for locating
-          in a community with limited affordable housing options, both subsidized
-          and non-subsidized.
-          Additionally, a development can get 3 more points for limited affordable housing
-          production in the past 20 years."
+          The QAP wants affordable housing in communities with limited.
+          <p></p>
+          A development can get 3 points for locating in a community with limited affordable housing options, both subsidized
+          and non-subsidized. Additionally, a development can get 3 more points for limited affordable housing
+          production in the past 20 years.
+          <p></p>
+          Turn on the housing layer to explore existing subsidized developments, including the number of units and year built of each development.
+          <p></p>
+          <div class="button">Scroll ... </div>
           <p></p>
         </div>
 
         <div class="slide">
           <h2 class="Slide-title">School Quality</h2>
-          "The QAP aims to build new affordable housing in communities with strong
-          neighborhood schools. Here, you can see that senior high schools with
-          building level academic scores of >=70% can receive 1 point, while those with
-          a score of >=80% can receive 2 points."
+          The QAP aims to build new affordable housing in communities with strong neighborhood schools.
+          <p><p>
+          Senior high schools with building level academic scores of >=70% can receive 1 point,
+          while those with a score of >=80% can receive 2 points.
+          <p></p>
+          Turn on the schools layer for more detail.
+          <p></p>
+          <div class="button">Scroll ... </div>
           <p></p>
         </div>
 
         <div class="slide">
           <h2 class="Slide-title">Transit-Oriented Design</h2>
-          "The QAP is looking to build new housing in transportation-accessible locations,
-           defined by the state as within 1/2 mile of a transit stop. Site selection
-           within this transit zone can receive 2 points."
+          The QAP aims to buld new subsidized housing in transportation-accessible locations,
+          defined by the state as within 1/2 mile of a transit stop.
           <p></p>
+          Site selection within this transit zone can receive 2 points.
+          <p></p>
+          Turn on the transit layer for an overlay of the transit zone.
+          <p></p>
+          <p></p>
+          Now use the search bar in the upper right to search for a location and assess its suitability for a subsidized housing project.
         </div>
       </div>
     </div>
   </div>
 
+  <nav id="menu"></nav>
+
   <!-- Map -->
   <div id="map" class="map">  </div>
-
-  <!-- Legend -->
-  <div id="legend">
-    <div class="label">Layers</div>
-    <div id="ptsLegend">
-      <div class = "pts">
-        
-  </div>
 
   <!-- Javascript Imports -->
   <script src="js/jquery.js"></script>

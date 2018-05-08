@@ -1,14 +1,19 @@
+# Global options
 setwd('/Users/amsr/Documents/GitHub/qapScoring-Final/data')
+options(stringsAsFactors = FALSE)
 
+library(rjson)
+library(plyr)
+
+
+
+library(geojsonio)
 library(sp)
 library(rgdal)
-library(plyr)
 library(dplyr)
-library(rjson)
 library(tidyr)
 library(devtools)
 library(sf)
-library(geojsonio)
 library(XML)
 library(xml2)
 library(RCurl)
@@ -18,15 +23,14 @@ library(mapview)
 library(readr)
 
 censusKey <- "4d92e5c53d5b7046bae0b72874aceed0fde3e0b4"
-greatSchoolsKey <- "4c6cbbb25c5ad456271f0b1e1b8fe9d4"
 walkscoreKey <-"a0a34de0dd2261f99677763bb3861e33"
 
 # Get geography set up
 hoods <- st_read("https://raw.githubusercontent.com/alisanroman/philly-hoods/master/data/Neighborhoods_Philadelphia.geojson")
-hoods$mapname <- as.character(hoods$mapname)
-allHoods <- unique(hoods$mapname)
-write.csv(allHoods,"hoods.csv")
-allHoods <- read.csv('hoods.csv')
+#hoods$mapname <- as.character(hoods$mapname)
+#allHoods <- unique(hoods$mapname)
+#write.csv(allHoods,"hoods.csv")
+allHoods <- read.csv('csv/hoods.csv')
 allHoods$mapname <- as.character(allHoods$mapname)
 allHoods$planURL <- as.character(allHoods$planURL)
 hoods2 <- merge(hoods,allHoods)
@@ -62,56 +66,6 @@ test <- census_pull(year=2016
                     ,vars = 'B17001_001E,B17001_002E,B25003_001E,B25003_002E'
                     ,stateFICS = 42,county = 101)
 
-# get school data
-stateAbbrev='PA'
-city='Philadelphia'
-schoolURL_charter <- paste0("https://api.greatschools.org/schools/",stateAbbrev,"/",city,"/charter/high-schools","?key=",greatSchoolsKey,"&sort=gs_rating&limit=-1" )
-schoolURL_public <- paste0("https://api.greatschools.org/schools/",stateAbbrev,"/",city,"/public/high-schools","?key=",greatSchoolsKey,"&sort=gs_rating&limit=-1" )
-
-xmlFile <- getURL(schoolURL_charter)
-xmlContent <- xmlParse(xmlFile)
-xmlroot <- xmlRoot(xmlContent)
-charterData <- xmlToDataFrame(xmlroot)
-
-xmlFile <- getURL(schoolURL_public)
-xmlContent <- xmlParse(xmlFile)
-xmlroot <- xmlRoot(xmlContent)
-publicData <- xmlToDataFrame(xmlroot)
-
-schoolData <- rbind(publicData,charterData)
-schoolData$lat <- as.numeric(schoolData$lat)
-schoolData$lon <- as.numeric(schoolData$lon)
-
-# now load in Pa specific data
-schoolDataPA <- read.delim("SPP.APD.2016.2017.txt",sep="|")
-schoolDataPA1 <- subset(schoolDataPA, Data.Element == 'Calculated Score'
-                        & (tolower(as.character(LEA.Name)) %in% 
-                           tolower(c(unique(schoolData$district),'Esperanza Academy Charter School'
-                                     ,"Mastery CS - Hardy Williams"
-                                     ,"HOPE for Hyndman CS"
-                                     ,"MaST Community CS II"
-                                     ,"Frederick Douglass Mastery Charter School"
-                                     ,"Multicultural Academy CS"
-                                     ,"Preparatory CS of Mathematics, Science, Tech, and Careers"))
-                        | grepl('phila',tolower(as.character(LEA.Name)))) )
-schoolDataPA1$BLAS <- as.numeric(as.character(schoolDataPA1$Display.Value))
-
-schoolDataPA1$pts <- ifelse(schoolDataPA1$BLAS >= 80, 2
-                            ,ifelse(schoolDataPA1$BLAS >= 70,1,0))
-colnames(schoolDataPA1)
-ds <- schoolDataPA1[,c(2,7,8)]
-colnames(ds)[1] <- 'name'
-write.csv(ds,"scldatPA.csv")
-#write.csv(schoolData,"gsDat.csv")
-gsDat <- read_csv("gsDat.csv")
-
-schoolPoint <- st_as_sf(x = gsDat, coords = c("lon", "lat"), crs = "+proj=longlat +datum=WGS84")
-schoolPoint  <- as(schoolPoint, "Spatial")
-mapview(schoolPoint)
-
-geojson_write(input=schoolPoint,file="schoolPoints.geojson")
-
-
 ## combine spatial & census data
 combo3 <- ddply(test, c("mapname"), summarise, 
                 pop = sum(B17001_001E, na.rm = TRUE),
@@ -122,11 +76,9 @@ combo3 <- ddply(test, c("mapname"), summarise,
 combo3$povPct <- ifelse(combo3$pop != 0, as.numeric(round((combo3$pov / combo3$pop) * 100,1)), NA)
 combo3$homPct <- ifelse(combo3$hhs != 0, as.numeric(round((combo3$hom / combo3$hhs) * 100,1)), NA)
 
-polyData <- left_join(x=hoods,y=combo3,by="mapname")
+polyData <- left_join(x=hoods2,y=combo3,by="mapname")
 polyData <- subset(polyData,select = -c(cartodb_id,created_at,updated_at,name,listname))
 polyData$lowPov <-  ifelse(polyData$povPct < 25.9,1,0)
-polydata$ownerOcc <- ifelse(polyData$homPct >= 52.4, 1,0)
-polydata$hsScores <- ifelse()
+polyData$ownerOcc <- ifelse(polyData$homPct >= 52.4, 1,0)
 
-
-geojson_write(input=polyData,file="polyData.geojson")
+geojson_write(input=polyData,file="censusData.geojson")
